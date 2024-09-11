@@ -49,12 +49,28 @@ const Signup = () => {
         },
         withCredentials: true,
       });
-      if (res.data.success || input.role === "student") {
-        navigate("/login");
+      // console.log(res.data.user);
+      if (res.data.success) {
+        navigate(`/verify/${res.data.user._id}`);
         toast.success(res.data.message);
+        const mail = await axios.post(
+          `${USER_API_END_POINT}/send-verification-mail`,
+          { email: input.email },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        if (mail.data.success) {
+          toast.success(mail.data.message);
+        } else {
+          console.log(mail.data.message);
+        }
       }
     } catch (error) {
-      // console.log(error.response.data);
+      console.log(error);
       toast.error(error.response.data.message);
     } finally {
       dispatch(setLoading(false));

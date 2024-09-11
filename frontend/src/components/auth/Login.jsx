@@ -41,7 +41,7 @@ const Login = () => {
         toast.success(res.data.message);
       }
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       toast.error(error.response.data.message);
     } finally {
       dispatch(setLoading(false));
@@ -111,8 +111,7 @@ const Login = () => {
           </div>
           {loading ? (
             <Button className="w-full my-4">
-              {" "}
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait{" "}
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
             </Button>
           ) : (
             <Button type="submit" className="w-full my-4">
@@ -120,7 +119,7 @@ const Login = () => {
             </Button>
           )}
           <span className="text-sm">
-            Don't have an account?{" "}
+            Don't have an account?
             <Link to="/signup" className="text-blue-600">
               Sign Up
             </Link>

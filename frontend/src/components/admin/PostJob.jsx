@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-const companyArray = [];
+// const companyArray = [];
 
 const PostJob = () => {
   const [input, setInput] = useState({
@@ -168,11 +168,11 @@ const PostJob = () => {
                     <SelectGroup>
                       {companies.map((company) => {
                         return (
-                          <>
+                          <div key={company._id}>
                             <SelectItem value={company?.name?.toLowerCase()}>
                               {company.name}
                             </SelectItem>
-                          </>
+                          </div>
                         );
                       })}
                     </SelectGroup>

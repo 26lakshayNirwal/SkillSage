@@ -1,24 +1,35 @@
 import { Company } from "../models/company.model.js";
-import getDataUri from "../utils/dataUri.js";
+import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 
 export const registerCompany = async (req, res) => {
   try {
     //TODO: Isme schema add krna hai company ka and usme required fields me description front end se bhejna hai waha dekho
-    const { companyName } = req.body;
-    if (!companyName) {
+    const { name, description, website, location } = req.body;
+    if (!name || !description || !website || !location) {
       return res
         .status(400)
-        .json({ message: "Company name is required", success: false });
+        .json({ message: "All fields are required", success: false });
     }
-    let company = await Company.findOne({ companyName });
+
+    let company = await Company.findOne({ name });
     if (company) {
       return res
         .status(400)
         .json({ message: "Company already exists", success: false });
     }
+    // if (description.length < 50 || description.length > 500) {
+    //   return res.status(400).json({
+    //     message: "Description must be between 50 to 500 characters.",
+    //     success: false,
+    //   });
+    // }
     company = await Company.create({
-      name: companyName,
+      name: name,
+      description: description,
+      website: website,
+      location: location,
+
       userId: req.id,
     });
 

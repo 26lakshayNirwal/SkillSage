@@ -61,7 +61,7 @@ const CompanySetup = () => {
         navigate("/admin/companies");
       }
     } catch (error) {
-      //   console.log(error);
+      console.log(error);
       toast.error(error.response.data.message);
     } finally {
       setLoading(false);
@@ -104,15 +104,7 @@ const CompanySetup = () => {
                 onChange={changeEventHandler}
               />
             </div>
-            <div>
-              <Label>Description</Label>
-              <Input
-                type="text"
-                name="description"
-                value={input.description}
-                onChange={changeEventHandler}
-              />
-            </div>
+
             <div>
               <Label>Website</Label>
               <Input
@@ -139,6 +131,17 @@ const CompanySetup = () => {
                 onChange={changeFileHandler}
               />
             </div>
+          </div>
+          <div>
+            <Label>Description</Label>
+            <textarea
+              className="border border-gray-200 rounded-md p-2 w-full"
+              rows="5"
+              type="text"
+              name="description"
+              value={input.description}
+              onChange={changeEventHandler}
+            ></textarea>
           </div>
           {loading ? (
             <Button className="w-full my-4">

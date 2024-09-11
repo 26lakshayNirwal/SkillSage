@@ -9,13 +9,13 @@ import AppliedJobTable from "./AppliedJobTable";
 import UpdateProfileDialog from "./UpdateProfileDialog";
 import { useSelector } from "react-redux";
 import Footer from "./shared/Footer";
-// import useGetAppliedJobs from "@/hooks/useGetAppliedJobs";
+import useGetAppliedJobs from "@/hooks/useGetAppliedJobs";
 
 // const skills = ["Html", "Css", "Javascript", "Reactjs"];
 const isResume = true;
 
 const Profile = () => {
-  //   useGetAppliedJobs();
+  useGetAppliedJobs();
   const [open, setOpen] = useState(false);
   const { user } = useSelector((store) => store.auth);
 
@@ -25,12 +25,12 @@ const Profile = () => {
       <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-2xl my-5 p-8">
         <div className="flex justify-between">
           <div className="flex items-center gap-4">
-            <Avatar className="h-24 w-24">
+            <Avatar>
               <AvatarImage
                 src={user?.profile?.profilePhoto}
                 alt="profile"
                 size="full"
-                className=" aspect-w-1 aspect-h-1"
+                className="w-fit h-min -translate-y-3"
               />
             </Avatar>
             <div>

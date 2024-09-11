@@ -12,6 +12,8 @@ import CompanyCreate from "./components/admin/CompanyCreate";
 import CompanySetup from "./components/admin/CompanySetup";
 import AdminJobs from "./components/admin/AdminJobs";
 import PostJob from "./components/admin/PostJob";
+import Applicants from "./components/admin/Applicants";
+import Verify from "./components/auth/Verify";
 
 const appRouter = createBrowserRouter([
   {
@@ -25,6 +27,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/signup",
     element: <Signup />,
+  },
+  {
+    path: "/verify/:id",
+    element: <Verify />,
   },
   {
     path: "/jobs",
@@ -61,6 +67,10 @@ const appRouter = createBrowserRouter([
   {
     path: "admin/jobs/create",
     element: <PostJob />,
+  },
+  {
+    path: "admin/jobs/:id/applicants",
+    element: <Applicants />,
   },
 ]);
 

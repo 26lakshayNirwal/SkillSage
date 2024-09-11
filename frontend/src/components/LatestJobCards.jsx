@@ -1,9 +1,14 @@
 import React from "react";
 import { Badge } from "./ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const LatestJobCards = ({ job }) => {
+  const navigate = useNavigate();
   return (
-    <div className="bg-white shadow-md p-4 rounded-md">
+    <div
+      onClick={() => navigate(`/description/${job._id}`)}
+      className="bg-white shadow-md p-4 rounded-md cursor-pointer"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="ml-3">
@@ -11,12 +16,12 @@ const LatestJobCards = ({ job }) => {
             <p className="text-sm text-gray-500">{job?.company?.name}</p>
           </div>
         </div>
-        <button className="bg-[#6A38C2] text-white px-4 py-1 rounded-md">
-          Apply
-        </button>
       </div>
       <div className="mt-4">
-        <p className="text-sm text-gray-500">{job?.description}</p>
+        <p className="text-sm text-gray-500">
+          {/* {job?.company?.description} */}
+          Company Description KAm Rakhna hai
+        </p>
       </div>
       <div className="flex items-center gap-2 mt-4">
         <Badge className={"text-blue-700 font-bold"} variant="ghost">

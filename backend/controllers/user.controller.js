@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/datauri.js";
+import sendVerificationEmail from "../utils/sendVerificationEmail.js";
 
 export const register = async (req, res) => {
   try {
@@ -43,7 +44,10 @@ export const register = async (req, res) => {
     const fileUri = getDataUri(file);
     const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
 
-    const user = await User.findOne({ email });
+    const isVerified = false;
+    const verifyToken = Math.floor(100000 + Math.random() * 900000);
+
+    let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({
         message: "User already exists",
@@ -52,7 +56,7 @@ export const register = async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.create({
+    user = await User.create({
       fullname,
       email,
       phoneNumber,
@@ -61,10 +65,13 @@ export const register = async (req, res) => {
       profile: {
         profilePhoto: cloudResponse.secure_url,
       },
+      isVerified,
+      verifyToken,
     });
     return res.status(201).json({
       message: "Account created successfully.",
       success: true,
+      user,
     });
   } catch (error) {
     console.log(error);
@@ -98,6 +105,12 @@ export const login = async (req, res) => {
     if (role !== user.role) {
       return res.status(403).json({
         message: "Unauthorized",
+        success: false,
+      });
+    }
+    if (!user.isVerified) {
+      return res.status(403).json({
+        message: "Account not verified",
         success: false,
       });
     }
@@ -187,6 +200,206 @@ export const updateProfile = async (req, res) => {
     return res.status(200).json({
       message: "Profile updated successfully.",
       user,
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const verifyUser = async (req, res) => {
+  try {
+    const { verifyToken } = req.body;
+    const { id } = req.params;
+    let user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+    if (user.isVerified) {
+      return res.status(400).json({
+        message: "Account already verified",
+        success: false,
+      });
+    }
+    if (user.verifyToken !== verifyToken) {
+      return res.status(400).json({
+        message: "Invalid token",
+        success: false,
+      });
+    }
+    user.isVerified = true;
+    user.verifyToken = "";
+    await user.save();
+    return res.status(200).json({
+      message: "Account verified successfully.",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const sendVerificationMail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    let user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+    if (user.isVerified) {
+      return res.status(400).json({
+        message: "Account already verified",
+        success: false,
+      });
+    }
+    const verify = user.verifyToken;
+    // TODO SEND EMAIL
+    // const verify = "123456";
+    const emailresponse = await sendVerificationEmail(email, verify);
+    if (!emailresponse) {
+      return res.status(500).json({
+        message: "Email not sent",
+        success: false,
+      });
+    }
+    return res.status(200).json({
+      message: "Verification email sent successfully.",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const userId = req.id;
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+    await user.remove();
+    cloudinary.uploader.destroy(user.profile.profilePhoto);
+    return res.status(200).json({
+      message: "Account deleted successfully.",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        message: "All fields are required",
+        success: false,
+      });
+    }
+    const userId = req.id;
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) {
+      return res.status(400).json({
+        message: "Invalid credentials",
+        success: false,
+      });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    return res.status(200).json({
+      message: "Password changed successfully.",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+        success: false,
+      });
+    }
+    let user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+    const resetToken = Math.floor(100000 + Math.random() * 900000);
+    user.resetToken = resetToken;
+    await user.save();
+    // TODO SEND EMAIL
+    const emailresponse = await sendVerificationEmail(email, resetToken);
+
+    if (!emailresponse) {
+      return res.status(500).json({
+        message: "Email not sent",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Reset password email sent successfully.",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+    if (!resetToken || !newPassword) {
+      return res.status(400).json({
+        message: "All fields are required",
+        success: false,
+      });
+    }
+    let user = await User.findOne({ resetToken });
+    if (!user) {
+      return res.status(404).json({
+        message: "Invalid token",
+        success: false,
+      });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetToken = "";
+    await user.save();
+    return res.status(200).json({
+      message: "Password reset successfully.",
       success: true,
     });
   } catch (error) {
