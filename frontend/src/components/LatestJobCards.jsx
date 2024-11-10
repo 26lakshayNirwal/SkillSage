@@ -3,6 +3,19 @@ import { Badge } from "./ui/badge";
 import { useNavigate } from "react-router-dom";
 
 const LatestJobCards = ({ job }) => {
+  job = {
+    _id: "1",
+    title: "Software Developer",
+    company: {
+      name: "Google",
+      description:
+        "Google is an American multinational technology company that specializes in Internet-related services and products, which include online advertising technologies, a search engine, cloud computing, software, and hardware.",
+    },
+    position: "Full Time",
+    jobType: "Remote",
+
+    salary: "1000$",
+  };
   const navigate = useNavigate();
   return (
     <div
@@ -18,10 +31,7 @@ const LatestJobCards = ({ job }) => {
         </div>
       </div>
       <div className="mt-4">
-        <p className="text-sm text-gray-500">
-          {/* {job?.company?.description} */}
-          Company Description KAm Rakhna hai
-        </p>
+        <p className="text-sm text-gray-500">{job?.company?.description}</p>
       </div>
       <div className="flex items-center gap-2 mt-4">
         <Badge className={"text-blue-700 font-bold"} variant="ghost">
